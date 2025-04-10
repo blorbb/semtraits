@@ -1,0 +1,12 @@
+[package]
+name = "semtraits"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", optional = true }
+
+[features]
+default = ["std"]
+std = []
+tokio = ["dep:tokio", "tokio/sync"]
