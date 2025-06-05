@@ -15,7 +15,7 @@ mod std {
     };
 
     use super::{POISON_PANIC_MESSAGE, RECV_PANIC_MESSAGE, SEND_PANIC_MESSAGE};
-    use crate::{OrHung, OrPoisoned, Share};
+    use crate::{OrClosed, OrPoisoned, Share};
 
     impl<T> Share for Rc<T> {}
     impl<T> Share for Arc<T> {}
@@ -24,18 +24,18 @@ mod std {
     impl<T> Share for Sender<T> {}
     impl<T> Share for SyncSender<T> {}
 
-    impl<T, E> OrHung for Result<T, SendError<E>> {
+    impl<T, E> OrClosed for Result<T, SendError<E>> {
         type Value = T;
 
-        fn or_hung(self) -> Self::Value {
+        fn or_closed(self) -> Self::Value {
             self.expect(SEND_PANIC_MESSAGE)
         }
     }
 
-    impl<T> OrHung for Result<T, RecvError> {
+    impl<T> OrClosed for Result<T, RecvError> {
         type Value = T;
 
-        fn or_hung(self) -> Self::Value {
+        fn or_closed(self) -> Self::Value {
             self.expect(RECV_PANIC_MESSAGE)
         }
     }
@@ -54,7 +54,7 @@ mod tokio {
     use tokio::sync::{mpsc, oneshot, watch};
 
     use super::{RECV_PANIC_MESSAGE, SEND_PANIC_MESSAGE};
-    use crate::{OrHung, Share};
+    use crate::{OrClosed, Share};
 
     impl<T> Share for mpsc::Sender<T> {}
     impl<T> Share for mpsc::UnboundedSender<T> {}
@@ -63,38 +63,38 @@ mod tokio {
     impl<T> Share for watch::Sender<T> {}
     impl<T> Share for watch::Receiver<T> {}
 
-    impl<T, E> OrHung for Result<T, mpsc::error::SendError<E>> {
+    impl<T, E> OrClosed for Result<T, mpsc::error::SendError<E>> {
         type Value = T;
 
-        fn or_hung(self) -> T {
+        fn or_closed(self) -> T {
             self.expect(SEND_PANIC_MESSAGE)
         }
     }
 
     // mpsc recv returns an Option instead of Result :(
 
-    impl<T, E> OrHung for Result<T, watch::error::SendError<E>> {
+    impl<T, E> OrClosed for Result<T, watch::error::SendError<E>> {
         type Value = T;
 
-        fn or_hung(self) -> T {
+        fn or_closed(self) -> T {
             self.expect(SEND_PANIC_MESSAGE)
         }
     }
 
-    impl<T> OrHung for Result<T, watch::error::RecvError> {
+    impl<T> OrClosed for Result<T, watch::error::RecvError> {
         type Value = T;
 
-        fn or_hung(self) -> Self::Value {
+        fn or_closed(self) -> Self::Value {
             self.expect(RECV_PANIC_MESSAGE)
         }
     }
 
     // oneshot send returns a Result<(), T> :(
 
-    impl<T> OrHung for Result<T, oneshot::error::RecvError> {
+    impl<T> OrClosed for Result<T, oneshot::error::RecvError> {
         type Value = T;
 
-        fn or_hung(self) -> Self::Value {
+        fn or_closed(self) -> Self::Value {
             self.expect(RECV_PANIC_MESSAGE)
         }
     }

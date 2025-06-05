@@ -47,28 +47,28 @@
 //!
 //! ## Disconnected Channels
 //!
-//! The [`OrHung`] trait is an alias for panicking when a channel
-//! sender or receiver is disconnected/hung up.
+//! The [`OrClosed`] trait is an alias for panicking when a channel
+//! is closed but one side tries to send/receive.
 //!
 //! The above example of the [`Share`] trait on channels highlights
-//! when [`OrHung`] may be used.
+//! when [`OrClosed`] may be used.
 //!
 //! ```
 //! use std::sync::mpsc;
 //! use std::thread;
-//! use semtraits::{Share, OrHung};
+//! use semtraits::{Share, OrClosed};
 //!
 //! let (tx, rx) = mpsc::channel();
 //! let tx1 = tx.share();
 //! thread::spawn(move || {
 //!     // same as .expect(...)
-//!     tx1.send(10).or_hung();
+//!     tx1.send(10).or_closed();
 //! });
 //! thread::spawn(move || {
-//!     tx.send(10).or_hung();
+//!     tx.send(10).or_closed();
 //! });
-//! assert_eq!(rx.recv().or_hung(), 10);
-//! assert_eq!(rx.recv().or_hung(), 10);
+//! assert_eq!(rx.recv().or_closed(), 10);
+//! assert_eq!(rx.recv().or_closed(), 10);
 //! ```
 //!
 //! This trait is implemented on the output of `tx.send()`
@@ -83,7 +83,7 @@
 //!
 //! ```
 //! use std::sync::Mutex;
-//! use semtraits::{Share, OrPoisoned};
+//! use semtraits::OrPoisoned;
 //!
 //! let mutex = Mutex::new(1);
 //!
@@ -114,10 +114,10 @@ pub trait Share: Clone {
     }
 }
 
-pub trait OrHung {
+pub trait OrClosed {
     type Value;
 
-    fn or_hung(self) -> Self::Value;
+    fn or_closed(self) -> Self::Value;
 }
 
 pub trait OrPoisoned {
