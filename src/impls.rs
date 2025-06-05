@@ -57,6 +57,9 @@ mod tokio {
     use crate::{OrHung, Share};
 
     impl<T> Share for mpsc::Sender<T> {}
+    impl<T> Share for mpsc::UnboundedSender<T> {}
+    impl<T> Share for mpsc::WeakSender<T> {}
+    impl<T> Share for mpsc::WeakUnboundedSender<T> {}
     impl<T> Share for watch::Sender<T> {}
     impl<T> Share for watch::Receiver<T> {}
 
